@@ -1,0 +1,414 @@
+/* Reset e configurações globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    font-size: 18px;  /* Aumentei o tamanho da fonte base */
+  }
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 10px;
+    overflow-x: hidden;
+  }
+  
+  .hidden {
+    display: none;
+  }
+   
+  /* Container genérico */
+  .container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 100%;
+    padding: 1.5rem;
+    animation: fadeIn 0.5s ease;
+    text-align: center;
+  }
+  
+  /* Painel principal do motorista */
+  .painel-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    margin-top: 0px;
+  }
+  
+  /* Títulos e textos */
+  h2, h3, h4 {
+    margin-bottom: 1rem;
+    color: #333;
+    text-align: center;
+  }
+  
+  p {
+    margin: 0.5rem 0;
+    font-size: 1.0rem; /* Aumentei o tamanho padrão */
+    color: #555;
+  }
+  
+  /* Inputs e botões */
+  input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+    transform: scale(1.02);
+  }
+  
+  /* Link */
+  a {
+    color: #74ebd5;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 350px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .modal-content button.cancelar {
+    background-color: #e53935;
+  }
+
+  .modal.hidden {
+    display: none !important;
+  }
+  
+  /* Ícones no topo */
+  .topoIcons {
+    display: flex;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+  }
+  
+  .iconItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .iconItem i {
+    font-size: 18px;
+  }
+  
+  .iconItem span {
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+  
+  /* Cartão do painel */
+  .cardPainel {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 10px;
+    text-align: left;
+  }
+  
+  .cardPainel h2 {
+    font-size: 1.1rem;
+  }
+  
+  .cardPainel p, .cardPainel i {
+    font-size: 0.9rem; /* Aumentei um pouco */
+  }
+  
+  /* Cartão de corrida aceita */
+  .card-corrida {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    animation: pulsar 2s infinite;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .info-bloco {
+    margin: 12px 0;
+  }
+  
+  .info-linha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  
+  .endereco-texto {
+    font-size: 15px; /* Aumentei um pouco */
+    color: #333;
+    word-break: break-word;
+  }
+  
+  .info-valores {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 1.0rem; /* Aumentei um pouco */
+  }
+  
+  .mapa-corrida {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    margin-top: 12px;
+    background: #eee;
+  }
+  
+  /* Ícones extras */
+  .icon-copy, .icon-blue, .icon-red, .icon-gold, .icon-gray {
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  /* Animações */
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulsar {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+  }
+
+  #loadingIcon {
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 10px;
+    animation: spin 1s linear infinite;
+    color: #333;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsivo */
+  @media (max-width: 600px) {
+    .container, .painel-container {
+      padding: 1rem;
+    }
+  
+    h2 {
+      font-size: 1.7rem;  /* Aumentei para telas menores */
+    }
+    h3 {
+        font-size: 1.3rem; /* Aumentei para telas menores */
+    }
+    h4 {
+        font-size: 1.1rem; /* Aumentei para telas menores */
+    }
+  
+    input, button {
+      font-size: 14px; /* Aumentei um pouco */
+    }
+  
+    .card-corrida {
+      font-size: 13px; /* Aumentei um pouco */
+      padding: 12px;
+    }
+  
+    .btn-copy {
+      font-size: 11px; /* Aumentei um pouco */
+    }
+  }
+
+  .usuario-header {
+    display: flex;
+    justify-content: space-between; /* Espalha o título e os ícones */
+    align-items: center; /* Alinha verticalmente */
+    margin-bottom: 10px; /* Espaço abaixo do cabeçalho */
+}
+
+.usuario-acoes {
+    display: flex;
+    gap: 10px; /* Espaço entre os ícones */
+}
+
+.icone-acao {
+    cursor: pointer; /* Muda o cursor para "pointer" na passagem do mouse */
+    font-size: 1.2em; /* Tamanho dos ícones */
+    color: #555; /* Cor dos ícones */
+}
+
+.linha-botoes {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .linha-botoes button {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .linha-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .linha-info p {
+    flex: 1;
+    margin: 0;
+  }
+  
+.icone-acao:hover {
+    color: #007bff; /* Cor ao passar o mouse (azul de destaque) */
+}
+/* Adicionado: estilo para inputs com ícones (sem alterar o HTML) */
+input#cpf,
+input#senha,
+input#nomeCadastro,
+input#cpfCadastro,
+input#senhaCadastro,
+input#telefoneCadastro,
+input#bairroCadastro,
+input#partida,
+input#destino {
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 18px;
+  padding-left: 36px; /* Espaço para o ícone */
+}
+
+input#cpf,
+input#cpfCadastro {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/id-card.svg");
+}
+
+input#senha,
+input#senhaCadastro {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/lock.svg");
+}
+
+input#nomeCadastro {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/user.svg");
+}
+
+input#telefoneCadastro {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/phone.svg");
+}
+
+input#bairroCadastro {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/map.svg");
+}
+
+input#partida {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/map-marker-alt.svg");
+}
+
+input#destino {
+  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/location-dot.svg");
+}
+
+/* Corrigido: rotação do ícone ao procurar motorista */
+#loadingMotorista i.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Já estava definido, mas reforçando o nome correto */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#mapaResumo {
+    width: 100%;
+    height: 300px; /* ou qualquer altura desejada */
+    border-radius: 8px;
+    margin-top: 12px;
+    background: #eee;
+  }
+  

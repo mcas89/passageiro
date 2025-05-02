@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>App Passageiro</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="estilos.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+</head>
+<body>
+  
+    <div id="mensagemErro" class="hidden"></div>
+
+  <div class="container">
+    <!-- Seção de Login -->
+    <div id="loginSection">
+      <h2><i class="fas fa-user"></i> Login</h2>
+      <input type="text" id="cpf" placeholder="CPF" />
+      <input type="password" id="senha" placeholder="Senha" />
+      <button onclick="loginPassageiro()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+      <p>Não tem cadastro? <a href="#" onclick="mostrarCadastro()">Cadastre-se</a></p>
+    </div>
+
+    <!-- Seção de Cadastro -->
+    <div id="cadastroSection" class="hidden">
+      <h2><i class="fas fa-id-card"></i> Cadastro</h2>
+      <input type="text" id="nomeCadastro" placeholder="Nome" />
+      <input type="text" id="cpfCadastro" placeholder="CPF" />
+      <input type="password" id="senhaCadastro" placeholder="Senha" />
+      <input type="text" id="telefoneCadastro" placeholder="Telefone" />
+      <input type="text" id="bairroCadastro" placeholder="Bairro" />
+      <button onclick="cadastrarPassageiro()"><i class="fas fa-user-plus"></i> Cadastrar</button>
+      <p><a href="#" onclick="mostrarLogin()">Já tem conta? Login</a></p>
+    </div>
+
+    <!-- Seção do Usuário Logado -->
+    <div id="infoUsuario" class="hidden">
+      <!-- Ações -->
+      <div class="card usuario-acoes-topo">
+        <i class="fas fa-edit icone-acao" onclick="editarPerfil()"></i>
+        <i class="fas fa-sign-out-alt icone-acao" onclick="logoutPassageiro()"></i>
+      </div>
+
+      <!-- Dados do Usuário -->
+      <div class="card usuario-dados">
+        <h3><i class="fas fa-smile"></i> Bem-vindo, <span id="nomeUsuario"></span></h3>
+        <p style="font-size: 0.9em;"><i class="fas fa-phone"></i> <span id="telefoneUsuario"></span></p>
+      </div>
+
+      <!-- Inputs da Corrida -->
+      <div class="card usuario-rotas">
+        <input type="text" id="partida" placeholder="Onde?" oninput="autocompleteEndereco(this, 'sugestoesPartida')" />
+        <div id="sugestoesPartida" class="autocomplete-suggestions"></div>
+
+        <input type="text" id="destino" placeholder="Para onde?" oninput="autocompleteEndereco(this, 'sugestoesDestino')" />
+        <div id="sugestoesDestino" class="autocomplete-suggestions"></div>
+
+        <button onclick="calcularRota()"><i class="fas fa-location-arrow"></i> OK</button>
+
+        <div id="loadingMotorista" class="hidden">
+          <p>Procurando motorista <i class="fas fa-spinner fa-spin"></i></p>
+        </div>
+      </div>
+
+      <!-- Informações do Motorista -->
+      <div id="infoMotorista" class="hidden card">
+        <p><i class="fas fa-user-tie"></i> <span id="nomeMotorista">---</span></p>
+        <p><i class="fas fa-car-side"></i> <span id="carroMotorista">---</span></p>
+        <p><i class="fas fa-id-badge"></i> <span id="placaMotorista">---</span></p>
+      </div>
+    </div>
+
+    <!-- Resumo da Corrida -->
+    <div id="resumoCorrida" class="hidden card">
+      <div class="linha-botoes">
+        <button onclick="solicitarCorrida()"><i class="fas fa-check"></i> Solicitar</button>
+        <button onclick="fecharcarddestino()" id="fecharcarddestino"><i class="fas fa-times"></i> Fechar</button>
+      </div>
+
+      <div class="botoes-acao">
+        <button onclick="cancelarCorrida()" id="botaoCancelar"><i class="fas fa-ban"></i> Cancelar</button>
+        <button onclick="finalizarCorrida()"><i class="fas fa-flag-checkered"></i> Finalizar</button>
+      </div>
+
+      <div class="linha-info">
+        <p><i class="fas fa-coins"></i> R$ <span id="precoEstimado"></span></p>
+        <p><i class="fas fa-road"></i> <span id="distanciaTotal"></span> km</p>
+      </div>
+
+      <p><i class="fas fa-map-marker-alt"></i> <span id="resumoPartida"></span></p>
+      <p><i class="fas fa-map-pin"></i> <span id="resumoDestino"></span></p>
+
+      <div id="mapaResumo"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
