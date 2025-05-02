@@ -17,26 +17,75 @@ document.getElementById('loginSection').classList.remove('hidden');
 }
 
 function cadastrarPassageiro() {
-const nome = document.getElementById('nomeCadastro').value;
-const cpf = document.getElementById('cpfCadastro').value;
-const senha = document.getElementById('senhaCadastro').value;
-const telefone = document.getElementById('telefoneCadastro').value;
-const bairro = document.getElementById('bairroCadastro').value;
+    const nome = document.getElementById('nomeCadastro').value.trim();
+    const cpf = document.getElementById('cpfCadastro').value.trim();
+    const senha = document.getElementById('senhaCadastro').value;
+    const telefone = document.getElementById('telefoneCadastro').value.trim();
+    const bairro = document.getElementById('bairroCadastro').value.trim();
 
-if (!cpf || !senha || !nome) return alert('Preencha os campos obrigatórios.');
+    if (!nome || !cpf || !senha) {
+        return alert('Preencha os campos obrigatórios (Nome, CPF e Senha).');
+    }
 
-fetch(`${firebaseURL}/${cpf}.json`, {
-method: 'PUT',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ nome, senha, telefone, bairro })
-}).then(() => {
-alert('Cadastro realizado com sucesso!');
-mostrarLogin();
-}).catch(err => {
-console.error(err);
-alert('Erro ao cadastrar.');
-});
+    if (!validarCPF(cpf)) {
+        return alert('CPF inválido. Verifique e tente novamente.');
+    }
+
+    if (senha.length < 4) {
+        return alert('Senha deve ter pelo menos 4 caracteres.');
+    }
+
+    fetch(`${firebaseURL}/${cpf}.json`)
+        .then(res => res.json())
+        .then(data => {
+            if (data) {
+                return alert('Este CPF já está cadastrado.');
+            }
+
+            fetch(`${firebaseURL}/${cpf}.json`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, senha, telefone, bairro })
+            })
+            .then(() => {
+                alert('Cadastro realizado com sucesso!');
+                mostrarLogin();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Erro ao cadastrar.');
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erro ao verificar CPF.');
+        });
 }
+
+function validarCPF(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, ''); // Remove não números
+  
+    if (cpf.length !== 11) return false;
+    if (/^(\d)\1+$/.test(cpf)) return false; // Ex: 111.111.111-11
+  
+    let soma = 0;
+    for (let i = 0; i < 9; i++) {
+      soma += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.charAt(9))) return false;
+  
+    soma = 0;
+    for (let i = 0; i < 10; i++) {
+      soma += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.charAt(10))) return false;
+  
+    return true;
+  }
 
 function loginPassageiro() {
     const cpf = document.getElementById('cpf').value;
@@ -570,5 +619,3 @@ function fecharcarddestino() {
     document.getElementById('resumoCorrida').classList.add('hidden');
     document.getElementById('loadingMotorista').classList.add('hidden');
 }
-
-
