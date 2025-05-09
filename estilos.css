@@ -4,7 +4,11 @@
     padding: 0;
     box-sizing: border-box;
   }
-  
+
+  .hidden {
+  display: none !important;
+  }
+
   html {
     scroll-behavior: smooth;
     font-size: 18px;  /* Aumentei o tamanho da fonte base */
@@ -21,10 +25,7 @@
     overflow-x: hidden;
   }
   
-  .hidden {
-    display: none;
-  }
-   
+    
   /* Container genérico */
   .container {
     background: #ffffff;
@@ -59,7 +60,7 @@
   }
   
   /* Inputs e botões */
-  input, button {
+  input, button,select {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
@@ -412,3 +413,21 @@ input#destino {
     background: #eee;
   }
   
+
+  .popup-erro {
+    position: fixed; /* Para ficar fixo na tela */
+    top: 20px; /* Margem superior */
+    left: 50%; /* Centralizar horizontalmente */
+    transform: translateX(-50%); /* Ajuste para centralizar */
+    background-color: rgba(255, 0, 0, 0.9); /* Vermelho semi-transparente */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    z-index: 1000; /* Para garantir que fique acima de outros elementos */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.popup-erro.hidden {
+    display: none;
+}
