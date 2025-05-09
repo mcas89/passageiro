@@ -3,8 +3,61 @@ const geoapifyKey = '6d5858a5a2b143618a05523338f5a0aa';
 let mapa, marcadorA, marcadorB;
 let mapaCorrida;
 let wakeLock = null;
-window.onload = verificarSessao;
 
+window.onload = verificarSessao;
+window.addEventListener("DOMContentLoaded", preencherBairros);
+
+
+const bairros = {
+  "Parque Continental": [
+      "Continental I", "Continental II", "Continental III", "Continental IV", "Continental V",
+      "Jardim Renzo (Gleba I)", "Jardim Betel (Antigo Parque Continental Gleba B)",
+      "Jardim Gracinda (Gleba II)", "Jardim Cambará (Gleba III)", "Jardim Valéria (Gleba IV)",
+      "Jardim Itapoã (Gleba IV)", "Jardim Adriana I (Gleba V)", "Jardim Adriana II (Gleba V)"
+  ],
+  "Cabuçu": [
+      "Vila Cambara", "Jardim Dorali", "Jardim Palmira", "Jardim Rosana", "Jardim Renzo",
+      "Recreio São Jorge", "Novo Recreio", "Chácaras Cabuçu", "Jardim Monte Alto"
+  ],
+  "São João": [
+      "Vila Rica", "Vila São João", "Jardim São Geraldo", "Jardim Vida Nova", "Jardim São João",
+      "Vila São Carlos", "Jardim Lenize", "Jardim Bondança", "Jardim Jade", "Jardim Cristina",
+      "Vila Girassol", "Jardim Santa Terezinha", "Jardim Aeródromo", "Cidade Soberana",
+      "Jardim Santo Expedito", "Cidade Seródio", "Jardim Novo Portugal", "Jardim Regina",
+      "Conjunto Residencial Haroldo Veloso"
+  ],
+  "Taboão": [
+      "Vila Mesquita", "Jardim Nova Taboão", "Jardim Santa Emília", "Jardim Imperial",
+      "Jardim Silvia", "Jardim Paraíso", "Jardim Acácio", "Parque Mikail", "Parque Mikail II",
+      "Jardim Araújo", "Vila Araújo", "Jardim Beirute", "Vila do Eden", "Jardim Odete",
+      "Jardim Taboão", "Jardim Santa Inês", "Jardim Santa Rita", "Jardim Belvedere",
+      "Jardim São Domingos", "Jardim Santa Lídia", "Jardim Dona Meri", "Jardim Marilena",
+      "Jardim Seviolli II", "Jardim Santa Vicência", "Jardim Sueli", "Jardim São José",
+      "Jardim Capri", "Jardim das Acácias", "Jardim Pereira", "Jardim Santo Eduardo",
+      "Jardim Tamassia", "Parque Santo Agostinho", "Parque Industrial do Jardim São Geraldo"
+  ],
+  "Fortaleza": [
+      "Jardim Fortaleza", "Rocinha"
+  ]
+  // ... (adicione os outros bairros)
+};
+
+function preencherBairros() {
+  const select = document.getElementById("bairroCadastro");
+
+  // Garante que apenas a opção padrão permaneça
+  select.innerHTML = '<option value="">Selecione um bairro</option>';
+
+  // Itera sobre os bairros pais
+  Object.values(bairros).forEach(lista => {
+    lista.forEach(bairroFilho => {
+      const option = document.createElement("option");
+      option.value = bairroFilho;
+      option.textContent = bairroFilho;
+      select.appendChild(option);
+    });
+  });
+}
 
 function mostrarCadastro() {
 document.getElementById('loginSection').classList.add('hidden');
@@ -14,6 +67,8 @@ document.getElementById('cadastroSection').classList.remove('hidden');
 function mostrarLogin() {
 document.getElementById('cadastroSection').classList.add('hidden');
 document.getElementById('loginSection').classList.remove('hidden');
+
+
 }
 
 function cadastrarPassageiro() {
@@ -22,9 +77,10 @@ function cadastrarPassageiro() {
     const senha = document.getElementById('senhaCadastro').value;
     const telefone = document.getElementById('telefoneCadastro').value.trim();
     const bairro = document.getElementById('bairroCadastro').value.trim();
+    
 
-    if (!nome || !cpf || !senha) {
-        return alert('Preencha os campos obrigatórios (Nome, CPF e Senha).');
+    if (!nome || !cpf || !senha || !telefone || !bairro) {
+        return alert('Preencha todos os campos obrigatórios.');
     }
 
     if (!validarCPF(cpf)) {
@@ -118,6 +174,7 @@ function loginPassageiro() {
 function exibirInfoUsuario(data) {
     document.getElementById("nomeUsuario").textContent = data.nome;
     document.getElementById("telefoneUsuario").textContent = data.telefone;
+    document.getElementById("bairroUsuarioTexto").textContent = data.bairro; // Adicionei esta linha
 
     document.getElementById('infoMotorista').style.display = 'none';
     document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
@@ -128,6 +185,8 @@ function exibirInfoUsuario(data) {
 
     document.getElementById("loginSection").classList.add("hidden");
     document.getElementById("infoUsuario").classList.remove("hidden");
+    document.querySelector(".usuario-dados").classList.remove("hidden");
+    document.querySelector(".usuario-rotas").classList.remove("hidden");
 }
 
 function verificarSessao() {
@@ -618,4 +677,120 @@ function fecharcarddestino() {
     document.getElementById('infoMotorista').style.display = 'none';
     document.getElementById('resumoCorrida').classList.add('hidden');
     document.getElementById('loadingMotorista').classList.add('hidden');
+}
+
+
+
+function editarPerfil() {
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    if (!usuarioLogado) {
+        alert('Usuário não logado.');
+        return;
+    }
+
+    document.querySelector('.usuario-dados').classList.add('hidden');
+    document.querySelector('.usuario-rotas').classList.add('hidden');
+    document.querySelector('button[onclick="calcularRota()"]').style.display = 'none';
+    document.getElementById('editarPerfilForm').classList.remove('hidden');
+
+    document.getElementById('editarNome').value = usuarioLogado.nome;
+    document.getElementById('editarTelefone').value = usuarioLogado.telefone;
+
+    // Preencher o select de bairros no formulário de edição
+    const selectEditarBairro = document.getElementById('editarBairro');
+    selectEditarBairro.innerHTML = '<option value="">Selecione o bairro</option>';
+
+    let bairroEncontrado = false; // Flag para verificar se o bairro existe nas opções
+    Object.values(bairros).forEach(lista => {
+        lista.forEach(bairroFilho => {
+            const option = document.createElement('option');
+            option.value = bairroFilho;
+            option.textContent = bairroFilho;
+            selectEditarBairro.appendChild(option);
+            if (document.getElementById('bairroUsuarioTexto').textContent === bairroFilho) {
+                bairroEncontrado = true;
+            }
+        });
+    });
+
+    if (bairroEncontrado) {
+        document.getElementById('editarBairro').value = document.getElementById('bairroUsuarioTexto').textContent;
+    } else {
+        console.warn('Bairro do usuário não encontrado na lista de bairros.');
+        document.getElementById('editarBairro').value = ""; // Ou defina um valor padrão
+    }
+}
+
+function cancelarEdicao() {
+    document.getElementById('editarPerfilForm').classList.add('hidden');
+    document.querySelector('.usuario-dados').classList.remove('hidden');
+    document.querySelector('.usuario-rotas').classList.remove('hidden'); // Mostrar inputs de endereço
+    document.querySelector('button[onclick="calcularRota()"]').style.display = ''; // Mostrar botão OK (ou 'block' se estava com 'display: none;')
+    document.getElementById('mensagemErro').classList.add('hidden'); // Ocultar mensagem de erro ao cancelar
+    document.getElementById('mensagemErro').textContent = ''; // Limpar texto da mensagem de erro
+}
+
+function salvarPerfil() {
+    const cpf = window.cpfLogado; // Ou obtenha do localStorage se necessário
+    const nome = document.getElementById('editarNome').value.trim();
+    const telefone = document.getElementById('editarTelefone').value.trim();
+    const bairro = document.getElementById('editarBairro').value.trim();
+
+    if (!nome || !telefone || !bairro) {
+        mostrarMensagemErro('Preencha todos os campos.');
+        return;
+    }
+
+    // Validação adicional (opcional)
+    if (!validarCPF(cpf)) {
+        mostrarMensagemErro('CPF inválido.');
+        return;
+    }
+
+    const dadosAtualizados = { nome, telefone, bairro };
+
+    // **Lembre-se:** O erro de CORS que você está vendo impede a comunicação com o Firebase
+    // quando você abre o arquivo HTML diretamente. Você PRECISA executar sua página através de um servidor web local
+    // para que as requisições `fetch` funcionem corretamente.
+
+    fetch(`<span class="math-inline">\{firebaseURL\}/</span>{cpf}.json`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosAtualizados)
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Atualizar localStorage
+        let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+        usuarioLogado.nome = nome;
+        usuarioLogado.telefone = telefone;
+        usuarioLogado.bairro = bairro; // Atualizar o bairro no localStorage
+        localStorage.setItem('usuarioLogado', JSON.stringify(usuarioLogado));
+
+        // Atualizar a interface
+        document.getElementById('nomeUsuario').textContent = nome;
+        document.getElementById('telefoneUsuario').textContent = telefone;
+        document.getElementById('bairroUsuarioTexto').textContent = bairro;
+
+        cancelarEdicao(); // Oculta o formulário e mostra os dados
+
+        alert('Perfil atualizado com sucesso!'); // Você pode remover este alert se preferir usar apenas o popup de erro para feedback
+    })
+    .catch(err => {
+        console.error(err);
+        mostrarMensagemErro('Erro ao atualizar perfil.');
+    });
+}
+
+function mostrarMensagemErro(mensagem) {
+    const popupErro = document.getElementById('popupErro');
+    const popupErroTexto = document.getElementById('popupErroTexto');
+
+    popupErroTexto.textContent = mensagem;
+    popupErro.classList.remove('hidden');
+
+    setTimeout(() => {
+        popupErro.classList.add('hidden');
+        popupErroTexto.textContent = '';
+    }, 3000);
 }
