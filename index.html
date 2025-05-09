@@ -34,27 +34,56 @@
       <input type="text" id="cpfCadastro" placeholder="CPF" />
       <input type="password" id="senhaCadastro" placeholder="Senha" />
       <input type="text" id="telefoneCadastro" placeholder="Telefone" />
-      <input type="text" id="bairroCadastro" placeholder="Bairro" />
+     
+        <select id="bairroCadastro">
+          <option value="">bairro</option>
+        </select>
+
       <button onclick="cadastrarPassageiro()"><i class="fas fa-user-plus"></i> Cadastrar</button>
       <p><a href="#" onclick="mostrarLogin()">Já tem conta? Login</a></p>
     </div>
 
     <!-- Seção do Usuário Logado -->
-    <div id="infoUsuario" class="hidden">
-      <!-- Ações -->
-      <div class="card usuario-acoes-topo">
-        <i class="fas fa-edit icone-acao" onclick="editarPerfil()"></i>
-        <i class="fas fa-sign-out-alt icone-acao" onclick="logoutPassageiro()"></i>
+    <div id="infoUsuario" class="topoIcons hidden">
+      <div class="iconItem" onclick="editarPerfil()">
+        <i class="fas fa-pen"></i>
+        <span class="iconText">Editar</span>
       </div>
 
+      <div class="iconItem" onclick="logoutPassageiro()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="iconText">Logout</span>
+      </div>
+    </div>
+
+    <div id="editarPerfilForm" class="card hidden">
+  <input type="text" id="editarNome" placeholder="Nome" />
+  <input type="text" id="editarTelefone" placeholder="Telefone" />
+  <select id="editarBairro">
+    <option value="">Selecione o bairro</option>
+    <!-- Preenchido via JS -->
+  </select>
+    <p id="mensagemErro" style="color: red; margin-top: 10px;"></p>
+    <button id="btnSalvarPerfil" onclick="salvarPerfil()">Salvar</button>
+    <button onclick="cancelarEdicao()" class="cancelar-btn">Cancelar</button>
+  </div>
+
+  <div id="popupErro" class="popup-erro hidden">
+    <span id="popupErroTexto"></span>
+</div>
+
+
+
+
       <!-- Dados do Usuário -->
-      <div class="card usuario-dados">
-        <h3><i class="fas fa-smile"></i> Bem-vindo, <span id="nomeUsuario"></span></h3>
-        <p style="font-size: 0.9em;"><i class="fas fa-phone"></i> <span id="telefoneUsuario"></span></p>
+      <div class="card usuario-dados hidden ">
+          <h3><i class="fas fa-smile"></i> Bem-vindo, <span id="nomeUsuario"></span></h3>
+          <p style="font-size: 0.9em;"><i class="fas fa-phone"></i> <span id="telefoneUsuario"></span></p>
+          <p style="font-size: 0.9em;"><i class="fas fa-map-marker-alt"></i> <span id="bairroUsuarioTexto"></span></p>
       </div>
 
       <!-- Inputs da Corrida -->
-      <div class="card usuario-rotas">
+      <div class="card usuario-rotas hidden">
         <input type="text" id="partida" placeholder="Onde?" oninput="autocompleteEndereco(this, 'sugestoesPartida')" />
         <div id="sugestoesPartida" class="autocomplete-suggestions"></div>
 
