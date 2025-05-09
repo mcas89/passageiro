@@ -731,7 +731,7 @@ function cancelarEdicao() {
 }
 
 function salvarPerfil() {
-    const cpf = window.cpfLogado; // Ou obtenha do localStorage se necessário
+    const cpf = window.cpfLogado;
     const nome = document.getElementById('editarNome').value.trim();
     const telefone = document.getElementById('editarTelefone').value.trim();
     const bairro = document.getElementById('editarBairro').value.trim();
@@ -741,40 +741,37 @@ function salvarPerfil() {
         return;
     }
 
-    // Validação adicional (opcional)
-    if (!validarCPF(cpf)) {
-        mostrarMensagemErro('CPF inválido.');
-        return;
-    }
+    const url = `${firebaseURL}/${cpf}.json`; // Construa a URL corretamente!
 
-    const dadosAtualizados = { nome, telefone, bairro };
-
-    // **Lembre-se:** O erro de CORS que você está vendo impede a comunicação com o Firebase
-    // quando você abre o arquivo HTML diretamente. Você PRECISA executar sua página através de um servidor web local
-    // para que as requisições `fetch` funcionem corretamente.
-
-    fetch(`<span class="math-inline">\{firebaseURL\}/</span>{cpf}.json`, {
+    fetch(url, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dadosAtualizados)
+        body: JSON.stringify({ nome, telefone, bairro })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+    })
     .then(data => {
         // Atualizar localStorage
         let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
-        usuarioLogado.nome = nome;
-        usuarioLogado.telefone = telefone;
-        usuarioLogado.bairro = bairro; // Atualizar o bairro no localStorage
-        localStorage.setItem('usuarioLogado', JSON.stringify(usuarioLogado));
+        if (usuarioLogado) {
+            usuarioLogado.nome = nome;
+            usuarioLogado.telefone = telefone;
+            usuarioLogado.bairro = bairro;
+            localStorage.setItem('usuarioLogado', JSON.stringify(usuarioLogado));
+        }
 
         // Atualizar a interface
         document.getElementById('nomeUsuario').textContent = nome;
         document.getElementById('telefoneUsuario').textContent = telefone;
         document.getElementById('bairroUsuarioTexto').textContent = bairro;
 
-        cancelarEdicao(); // Oculta o formulário e mostra os dados
+        cancelarEdicao();
 
-        alert('Perfil atualizado com sucesso!'); // Você pode remover este alert se preferir usar apenas o popup de erro para feedback
+        alert('Perfil atualizado com sucesso!');
     })
     .catch(err => {
         console.error(err);
