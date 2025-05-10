@@ -3,10 +3,11 @@ const geoapifyKey = '6d5858a5a2b143618a05523338f5a0aa';
 let mapa, marcadorA, marcadorB;
 let mapaCorrida;
 let wakeLock = null;
+let debounceTimeout;
 
 window.onload = verificarSessao;
 window.addEventListener("DOMContentLoaded", preencherBairros);
-
+localStorage.setItem("cpfPassageiro", cpf);
 
 const bairros = {
   "Parque Continental": [
@@ -80,22 +81,22 @@ function cadastrarPassageiro() {
     
 
     if (!nome || !cpf || !senha || !telefone || !bairro) {
-        return alert('Preencha todos os campos obrigatórios.');
+        return mostrarPopup('Preencha todos os campos obrigatórios.', 3000)
     }
 
     if (!validarCPF(cpf)) {
-        return alert('CPF inválido. Verifique e tente novamente.');
+        return mostrarPopup('CPF inválido. Verifique e tente novamente.', 3000)
     }
 
     if (senha.length < 4) {
-        return alert('Senha deve ter pelo menos 4 caracteres.');
+        return mostrarPopup('Senha deve ter pelo menos 4 caracteres.', 3000)
     }
 
     fetch(`${firebaseURL}/${cpf}.json`)
         .then(res => res.json())
         .then(data => {
             if (data) {
-                return alert('Este CPF já está cadastrado.');
+                return mostrarPopup('Este CPF já está cadastrado.', 3000)
             }
 
             fetch(`${firebaseURL}/${cpf}.json`, {
@@ -104,17 +105,17 @@ function cadastrarPassageiro() {
                 body: JSON.stringify({ nome, senha, telefone, bairro })
             })
             .then(() => {
-                alert('Cadastro realizado com sucesso!');
+                mostrarPopup('Cadastro realizado com sucesso!', 3000)
                 mostrarLogin();
             })
             .catch(err => {
                 console.error(err);
-                alert('Erro ao cadastrar.');
+                mostrarPopup('Erro ao cadastrar.', 3000)
             });
         })
         .catch(err => {
             console.error(err);
-            alert('Erro ao verificar CPF.');
+            mostrarPopup('Erro ao verificar CPF.', 3000)
         });
 }
 
@@ -150,14 +151,15 @@ function loginPassageiro() {
     fetch(`${firebaseURL}/${cpf}.json`)
         .then(res => res.json())
         .then(data => {
-            if (!data) return alert("CPF não cadastrado.");
-            if (data.senha !== senha) return alert("Senha incorreta.");
+            if (!data) return mostrarPopup('CPF não cadastrado.', 3000)
+            if (data.senha !== senha) return mostrarPopup('Senha incorreta.', 3000)
 
             // Salvar dados no LocalStorage
             localStorage.setItem('usuarioLogado', JSON.stringify({
                 cpf: cpf,
                 nome: data.nome,
-                telefone: data.telefone
+                telefone: data.telefone,
+                bairro: data.bairro // <--- CORREÇÃO: Adicionada esta linha para incluir o bairro
             }));
 
             exibirInfoUsuario(data); // Função para exibir informações do usuário
@@ -256,26 +258,56 @@ navigator.geolocation.getCurrentPosition(pos => {
 }
 
 function autocompleteEndereco(input, sugestaoId) {
-const valor = input.value;
-const sugestoes = document.getElementById(sugestaoId);
-if (valor.length < 3) return sugestoes.innerHTML = '', sugestoes.classList.add('hidden');
+  clearTimeout(debounceTimeout);
 
-fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(valor)}&limit=5&lang=pt&filter=countrycode:br&apiKey=${geoapifyKey}`)
-.then(res => res.json())
-.then(data => {
-  sugestoes.innerHTML = '';
-  data.features.forEach(feature => {
-    const div = document.createElement('div');
-    div.textContent = feature.properties.formatted;
-    div.onclick = () => {
-      input.value = feature.properties.formatted;
+  debounceTimeout = setTimeout(() => {
+    const valor = input.value.trim();
+    const sugestoes = document.getElementById(sugestaoId);
+
+    if (valor.length < 4) {
       sugestoes.innerHTML = '';
       sugestoes.classList.add('hidden');
-    };
-    sugestoes.appendChild(div);
-  });
-  sugestoes.classList.remove('hidden');
-});
+      return;
+    }
+
+   fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(valor)}&limit=5&lang=pt&filter=circle:-46.5333,-23.4545,5000&apiKey=${geoapifyKey}`)
+
+      .then(res => res.json())
+      .then(data => {
+        sugestoes.innerHTML = '';
+
+        if (!data.features || data.features.length === 0) {
+          sugestoes.classList.add('hidden');
+          return;
+        }
+
+        data.features.forEach(feature => {
+          const div = document.createElement('div');
+          const textoCompleto = feature.properties.formatted;
+
+          const regex = new RegExp(`(${valor})`, 'i');
+          const textoDestacado = textoCompleto.replace(regex, `<strong>$1</strong>`);
+          div.innerHTML = textoDestacado;
+
+          div.style.cursor = 'pointer';
+          div.style.padding = '5px';
+
+          div.onclick = () => {
+            input.value = textoCompleto;
+            sugestoes.innerHTML = '';
+            sugestoes.classList.add('hidden');
+          };
+
+          sugestoes.appendChild(div);
+        });
+
+        sugestoes.classList.remove('hidden');
+      })
+      .catch(error => {
+        console.error("Erro ao buscar sugestões:", error);
+        sugestoes.classList.add('hidden');
+      });
+  }, 300);
 }
 
 async function calcularRota() {
@@ -291,7 +323,7 @@ const coordPartida = await getCoords(partida);
 const coordDestino = await getCoords(destino);
 
 if (!coordPartida || !coordDestino) {
-return alert("Não foi possível obter as coordenadas. Verifique os endereços.");
+return mostrarPopup('Não foi possível obter as coordenadas. Verifique os endereços.', 3000)
 }
 
 // Exibir o mapa utilizando a função de mostrarMapa
@@ -303,7 +335,7 @@ fetch(`https://api.geoapify.com/v1/routing?waypoints=${coordPartida.join(',')}|$
 .then(data => {
   // Verificar se a API retornou um resultado válido
   if (!data.features || data.features.length === 0) {
-  console.error('Não foi possível calcular a rota.'); // apenas registra no console
+  console.error('Não foi possível calcular a rota.');
   return; // encerra a execução
 }
 
@@ -326,145 +358,161 @@ fetch(`https://api.geoapify.com/v1/routing?waypoints=${coordPartida.join(',')}|$
 })
 .catch(err => {
   console.error(err);
-  alert("Ocorreu um erro ao calcular a rota.");
+  mostrarPopup('Ocorreu um erro ao calcular a rota.', 3000)
 });
 }
 
 async function mostrarMapa(partida, destino) {
-const coords = await Promise.all([getCoords(partida), getCoords(destino)]);
+  const coords = await Promise.all([getCoords(partida), getCoords(destino)]);
 
-// Verificar se as coordenadas foram obtidas corretamente
-if (!coords[0] || !coords[1]) {
-return alert("Não foi possível obter as coordenadas de partida ou destino.");
-}
-
-// Inicializar o mapa
-const mapa = L.map('mapaResumo').setView(coords[0], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
-
-// Adicionar marcadores de partida e destino
-L.marker(coords[0]).addTo(mapa).bindPopup("Partida").openPopup();
-L.marker(coords[1]).addTo(mapa).bindPopup("Destino");
-
-// Chamada à API do Geoapify para calcular a rota
-fetch(`https://api.geoapify.com/v1/routing?waypoints=${coords[0][1]},${coords[0][0]}|${coords[1][1]},${coords[1][0]}&mode=drive&apiKey=${geoapifyKey}`)
-.then(res => res.json())
-.then(data => {
-  // Verificar se a API retornou a rota corretamente
-  if (!data.features || data.features.length === 0) {
-    return alert('Não foi possível calcular a rota.');
+  if (!coords[0] || !coords[1]) {
+    return mostrarPopup('Não foi possível obter as coordenadas de partida ou destino.', 3000);
   }
 
-  const rota = data.features[0];
-  const rotaCoords = rota.geometry.coordinates.map(c => [c[1], c[0]]);
-  
-  // Adicionar a linha azul da rota no mapa
-  L.polyline(rotaCoords, { color: 'blue' }).addTo(mapa);
-  mapa.fitBounds(rotaCoords);
+  // Se o mapa já existir, remova-o
+  if (mapa) {
+    mapa.remove();
+  }
 
-  // Exibir distância e duração no UI
-  document.getElementById('distanciaAceita').textContent = (rota.properties.distance / 1000).toFixed(2);
-  document.getElementById('duracaoAceita').textContent = (rota.properties.time / 60).toFixed(1);
+  // Criar novo mapa
+  mapa = L.map('mapaResumo').setView(coords[0], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
 
-  // Animação do marcador percorrendo a rota
-  let latlngs = rotaCoords;
-  let i = 0;
-  const marcadorAnimado = L.marker(latlngs[i]).addTo(mapa);
-  
-  // Função de animação
-  const intervalo = setInterval(() => {
-    if (i < latlngs.length - 1) {
-      i++;
-      marcadorAnimado.setLatLng(latlngs[i]);
-    } else {
-      clearInterval(intervalo);  // Para a animação quando chegar ao destino
+  // Marcadores
+  L.marker(coords[0]).addTo(mapa).bindPopup("Partida").openPopup();
+  L.marker(coords[1]).addTo(mapa).bindPopup("Destino");
+
+  try {
+    const res = await fetch(`https://api.geoapify.com/v1/routing?waypoints=${coords[0][1]},${coords[0][0]}|${coords[1][1]},${coords[1][0]}&mode=drive&apiKey=${geoapifyKey}`);
+    const data = await res.json();
+
+    if (!data.features || data.features.length === 0) {
+      return mostrarPopup('Não foi possível calcular a rota.', 2000);
     }
-  }, 100);  // Intervalo de animação, você pode ajustar a velocidade aqui
-})
-.catch(err => {
-  console.error(err);
-  alert("Ocorreu um erro ao carregar a rota no mapa.");
-});
+
+    const rota = data.features[0];
+    const rotaCoords = rota.geometry.coordinates.map(c => [c[1], c[0]]);
+
+    L.polyline(rotaCoords, { color: 'blue' }).addTo(mapa);
+    mapa.fitBounds(rotaCoords);
+
+    document.getElementById('distanciaAceita').textContent = (rota.properties.distance / 1000).toFixed(2);
+    document.getElementById('duracaoAceita').textContent = (rota.properties.time / 60).toFixed(1);
+
+    // Animação do marcador
+    let i = 0;
+    const marcadorAnimado = L.marker(rotaCoords[i]).addTo(mapa);
+
+    const intervalo = setInterval(() => {
+      if (i < rotaCoords.length - 1) {
+        i++;
+        marcadorAnimado.setLatLng(rotaCoords[i]);
+      } else {
+        clearInterval(intervalo);
+      }
+    }, 100);
+  } catch (err) {
+    console.error(err);
+    mostrarPopup('Ocorreu um erro ao carregar a rota no mapa.', 2000);
+  }
 }
 
 async function getCoords(endereco) {
 const res = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(endereco)}&apiKey=${geoapifyKey}`);
 const data = await res.json();
 if (data.features.length === 0) {
-alert('Endereço não encontrado: ' + endereco);
+mostrarPopup('Endereço não encontrado:'+ endereco, 3000)
 return null;
 }
 return [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
 }
 
 function solicitarCorrida() {
-const cpfPassageiro = window.cpfLogado;
-if (!cpfPassageiro) {
-alert('Usuário não identificado.');
-return;
-}
+    const cpfPassageiro = window.cpfLogado;
+    if (!cpfPassageiro) {
+        mostrarPopup('Usuário não identificado.', 3000)
+        return;
+    }
 
-const partida = document.getElementById('partida').value;
-const destino = document.getElementById('destino').value;
-const distanciaKm = parseFloat(document.getElementById('distanciaTotal').textContent);
-const preco = parseFloat(document.getElementById('precoEstimado').textContent);
-requestWakeLock()
+    const partida = document.getElementById('partida').value;
+    const destino = document.getElementById('destino').value;
+    const distanciaKm = parseFloat(document.getElementById('distanciaTotal').textContent);
+    const preco = parseFloat(document.getElementById('precoEstimado').textContent);
+    requestWakeLock();
 
-if (!partida || !destino || isNaN(distanciaKm) || isNaN(preco)) {
-alert('Informe todos os dados necessários para solicitar a corrida.');
-return;
-}
+    if (!partida || !destino || isNaN(distanciaKm) || isNaN(preco)) {
+        mostrarPopup('Informe todos os dados necessários para solicitar a corrida.', 3000)
+        return;
+    }
 
-const novaCorrida = {
-data: new Date().toISOString(),
-partida,
-destino,
-distancia_km: distanciaKm,
-preco,
-status: "pendente",
-motorista: ""
-};
+    // Buscar o bairro do passageiro no Firebase
+    fetch(`${firebaseURL}/${cpfPassageiro}.json`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.bairro) {
+                console.error('Bairro do passageiro não encontrado.');
+                mostrarPopup('Erro: Bairro do passageiro não encontrado. Não é possível solicitar a corrida.', 3000)
+                return; // Importante: interrompe a função se o bairro não for encontrado
+            }
 
-const firebaseURLCorrida = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${cpfPassageiro}.json`;
+            const bairroPassageiro = data.bairro;
 
-fetch(firebaseURLCorrida, {
-method: 'PUT',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify(novaCorrida)
-})
-.then(() => {
-alert('Corrida solicitada com sucesso!');
+            const novaCorrida = {
+                data: new Date().toISOString(),
+                partida,
+                destino,
+                distancia_km: distanciaKm,
+                preco,
+                status: "pendente",
+                motorista: "",
+                bairroPassageiro // Adicionando o bairro do passageiro
+            };
 
-// Ocultar campos e botões
-document.getElementById('partida').style.display = 'none';
-document.getElementById('destino').style.display = 'none';
+            const firebaseURLCorrida = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${cpfPassageiro}.json`;
 
-const botaoOk = document.querySelector('button[onclick="calcularRota()"]');
-if (botaoOk) botaoOk.style.display = 'none';
-const botaoSolicitar = document.querySelector('button[onclick="solicitarCorrida()"]');
-if (botaoSolicitar) botaoSolicitar.style.display = 'none';
-const botaoCancelar = document.getElementById('botaoCancelar');
-if (botaoCancelar) botaoCancelar.style.display = 'block';
+            fetch(firebaseURLCorrida, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novaCorrida)
+            })
+            .then(() => {
+                mostrarPopup('Corrida solicitada com sucesso!', 3000)
 
+                // Ocultar campos e botões
+                document.getElementById('partida').style.display = 'none';
+                document.getElementById('destino').style.display = 'none';
 
-// Atualiza o resumo
-document.getElementById('fecharcarddestino').style.display = 'none';
-document.getElementById('resumoCorrida').classList.remove('hidden');
-document.getElementById('resumoPartida').textContent = partida;
-document.getElementById('resumoDestino').textContent = destino;
-document.getElementById('distanciaTotal').textContent = distanciaKm.toFixed(2);
-document.getElementById('precoEstimado').textContent = preco.toFixed(2);
+                const botaoOk = document.querySelector('button[onclick="calcularRota()"]');
+                if (botaoOk) botaoOk.style.display = 'none';
+                const botaoSolicitar = document.querySelector('button[onclick="solicitarCorrida()"]');
+                if (botaoSolicitar) botaoSolicitar.style.display = 'none';
+                const botaoCancelar = document.getElementById('botaoCancelar');
+                if (botaoCancelar) botaoCancelar.style.display = 'block';
 
-// Mostra loading
-document.getElementById('loadingMotorista').classList.remove('hidden');
+                // Atualiza o resumo
+                document.getElementById('fecharcarddestino').style.display = 'none';
+                document.getElementById('resumoCorrida').classList.remove('hidden');
+                document.getElementById('resumoPartida').textContent = partida;
+                document.getElementById('resumoDestino').textContent = destino;
+                document.getElementById('distanciaTotal').textContent = distanciaKm.toFixed(2);
+                document.getElementById('precoEstimado').textContent = preco.toFixed(2);
 
-// Iniciar monitoramento
-verificarAceiteMotorista(cpfPassageiro);
-})
-.catch(error => {
-console.error("Erro ao solicitar corrida:", error);
-alert('Erro ao solicitar a corrida. Tente novamente.');
-});
+                // Mostra loading
+                document.getElementById('loadingMotorista').classList.remove('hidden');
+
+                // Iniciar monitoramento
+                verificarAceiteMotorista(cpfPassageiro);
+            })
+            .catch(error => {
+                console.error("Erro ao solicitar corrida:", error);
+                mostrarPopup('Erro ao solicitar a corrida. Tente novamente.', 3000)
+            });
+
+        })
+        .catch(error => {
+            console.error("Erro ao buscar dados do passageiro:", error);
+            mostrarPopup('Erro ao buscar dados do passageiro. Tente novamente.', 3000)
+        });
 }
 
 function preencherResumoCorrida(corrida) {
@@ -521,7 +569,7 @@ fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${c
         document.getElementById('loadingMotorista').classList.remove('hidden');
         document.getElementById('infoMotorista').style.display = 'none';
         document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
-        alert('Corrida voltou para pendente. Buscando novo motorista...');
+        mostrarPopup('Buscando novo motorista...', 3000)
       }
     } else if (data.status === 'cancelada') {
       limparMotorista();
@@ -530,7 +578,7 @@ fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${c
       clearInterval(window.temporizadorInterval);
       document.getElementById('infoMotorista').style.display = 'none';
       document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
-      alert('Motorista cancelou a corrida.');
+      mostrarPopup('Motorista cancelou a corrida.', 3000)
     }
   })
   .catch(err => console.error("Erro ao verificar corrida:", err));
@@ -589,7 +637,7 @@ return;
 
 const cpfPassageiro = window.cpfLogado;
 if (!cpfPassageiro) {
-alert('Usuário não identificado.');
+mostrarPopup('Usuário não identificado.', 3000)
 return;
 }
 
@@ -618,11 +666,11 @@ document.getElementById('loadingMotorista').classList.add('hidden');
 limparMotorista();
 window.corridaIdCriada = null;
 
-alert('Corrida cancelada com sucesso!');
+mostrarPopup('Corrida cancelada com sucesso!', 3000)
 })
 .catch(error => {
 console.error("Erro ao cancelar corrida:", error);
-alert('Erro ao cancelar a corrida. Tente novamente.');
+mostrarPopup('Erro ao cancelar a corrida. Tente novamente.', 3000)
 });
 }
 
@@ -678,8 +726,6 @@ function fecharcarddestino() {
     document.getElementById('resumoCorrida').classList.add('hidden');
     document.getElementById('loadingMotorista').classList.add('hidden');
 }
-
-
 
 function editarPerfil() {
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
@@ -771,7 +817,7 @@ function salvarPerfil() {
 
         cancelarEdicao();
 
-        alert('Perfil atualizado com sucesso!');
+        mostrarPopup('Perfil atualizado com sucesso!', 3000)
     })
     .catch(err => {
         console.error(err);
@@ -790,4 +836,24 @@ function mostrarMensagemErro(mensagem) {
         popupErro.classList.add('hidden');
         popupErroTexto.textContent = '';
     }, 3000);
+}
+
+function mostrarPopup(mensagem, tempoEsconder = null) {
+    const popup = document.getElementById('popupMensagem');
+    const texto = document.getElementById('popupTexto');
+    
+    texto.textContent = mensagem;
+    popup.classList.remove('hidden');
+
+    // Se tempoEsconder for passado, fecha automaticamente
+    if (tempoEsconder) {
+        setTimeout(() => {
+            fecharPopup();
+        }, tempoEsconder);
+    }
+}
+
+function fecharPopup() {
+    const popup = document.getElementById('popupMensagem');
+    popup.classList.add('hidden');
 }
