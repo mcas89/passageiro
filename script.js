@@ -699,6 +699,7 @@ fetch(firebaseURLCorrida)
 })
 .catch(err => console.error("Erro ao buscar corrida existente:", err));
 }
+
 function finalizarCorrida() {
     if (!confirm('Confirma que a corrida foi finalizada?')) return;
 
@@ -773,7 +774,9 @@ function finalizarCorrida() {
                         partida: corrida.partida,
                         destino: corrida.destino,
                         preco: corrida.preco,
-                        passageiro: cpfPassageiro
+                        status: 'finalizada',
+                        passageiro: corrida.nomePassageiro || 'Desconhecido',
+                        
                     };
 
                     return fetch(urlHistoricoMotorista, {
