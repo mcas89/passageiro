@@ -51,6 +51,11 @@
         <span class="iconText" id="bairroUsuarioTexto"></span>
       </div>
 
+      <div class="iconItem" onclick="mostrarHistoricoCorridas()">
+        <i class="fas fa-history"></i>
+        <span class="iconText">Histórico</span>
+      </div>
+
       <div class="iconItem" onclick="logoutPassageiro()">
         <i class="fas fa-sign-out-alt"></i>
         <span class="iconText">Logout</span>
@@ -125,6 +130,24 @@
   <button onclick="fecharPopup()">OK</button>
 </div>
 
+<div id="cardResumoCorrida" class="card-resumo hidden">
+  <h2>Corrida Finalizada</h2>
+  <p><strong>De:</strong> <span id="resumoPartidaCard"></span></p>
+  <p><strong>Para:</strong> <span id="resumoDestinoCard"></span></p>
+  <p><strong>Distância:</strong> <span id="resumoDistanciaCard"></span> km</p>
+  <p><strong>Motorista:</strong> <span id="resumoMotoristaCard"></span></p>
+  <p class="valor-a-pagar">Total a pagar:<br><span id="resumoPrecoCard"></span></p>
+
+  <button onclick="fecharCardResumoCorrida()">OK</button>
+</div>
+
+<div id="cardHistorico" class="card-historico hidden">
+  <div class="header-historico">
+    <h2>Histórico de Corridas</h2>
+    <button class="fechar-btn" onclick="fecharCardHistorico()">&times;</button>
+  </div>
+  <div id="listaHistorico" class="lista-corridas"></div>
+</div>
 
 
 
