@@ -544,46 +544,46 @@ fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/motoristas/$
 }
 
 function verificarAceiteMotorista(cpfPassageiro) {
-window.temporizadorInterval = setInterval(() => {
-fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${cpfPassageiro}.json`)
-  .then(res => res.json())
-  .then(data => {
-    if (!data) return;
+  window.temporizadorInterval = setInterval(() => {
+    fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${cpfPassageiro}.json`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data) return;
 
-    if (data.status === 'aceita' && data.motorista) {
-      if (!window.motoristaExibido || window.motoristaAtual !== data.motorista) {
-        alert('Sua corrida foi aceita pelo motorista!');
-        document.getElementById('loadingMotorista').classList.add('hidden');
-        exibirMotorista(data.motorista);
-        window.motoristaExibido = true;
-        window.motoristaAtual = data.motorista;
-        document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'block';
-        document.getElementById('infoMotorista').style.display = 'block';
-
-      }
-    } else if (data.status === 'pendente') {
-      if (window.motoristaExibido) {
-        limparMotorista();
-        window.motoristaExibido = false;
-        window.motoristaAtual = null;
-        document.getElementById('loadingMotorista').classList.remove('hidden');
-        document.getElementById('infoMotorista').style.display = 'none';
-        document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
-        mostrarPopup('Buscando novo motorista...', 3000)
-      }
-    } else if (data.status === 'cancelada') {
-      limparMotorista();
-      window.motoristaExibido = false;
-      window.motoristaAtual = null;
-      clearInterval(window.temporizadorInterval);
-      document.getElementById('infoMotorista').style.display = 'none';
-      document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
-      mostrarPopup('Motorista cancelou a corrida.', 3000)
-    }
-  })
-  .catch(err => console.error("Erro ao verificar corrida:", err));
-}, 3000);
+        if (data.status === 'aceita' && data.motorista) {
+          if (!window.motoristaExibido || window.motoristaAtual !== data.motorista) {
+            mostrarPopup('Sua corrida foi aceita pelo motorista!', 3000);
+            document.getElementById('loadingMotorista').classList.add('hidden');
+            exibirMotorista(data.motorista);
+            window.motoristaExibido = true;
+            window.motoristaAtual = data.motorista;
+            document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'block';
+            document.getElementById('infoMotorista').classList.remove('hidden'); // Corrigido aqui
+          }
+        } else if (data.status === 'pendente') {
+          if (window.motoristaExibido) {
+            limparMotorista();
+            window.motoristaExibido = false;
+            window.motoristaAtual = null;
+            document.getElementById('loadingMotorista').classList.remove('hidden');
+            document.getElementById('infoMotorista').classList.add('hidden'); // Corrigido aqui
+            document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
+            mostrarPopup('Buscando novo motorista...', 3000);
+          }
+        } else if (data.status === 'cancelada') {
+          limparMotorista();
+          window.motoristaExibido = false;
+          window.motoristaAtual = null;
+          clearInterval(window.temporizadorInterval);
+          document.getElementById('infoMotorista').classList.add('hidden'); // Corrigido aqui
+          document.querySelector('button[onclick="finalizarCorrida()"]').style.display = 'none';
+          mostrarPopup('Motorista cancelou a corrida.', 3000);
+        }
+      })
+      .catch(err => console.error("Erro ao verificar corrida:", err));
+  }, 3000);
 }
+
 
 function listenToCorridaStatus() {
 const firebaseURL = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${window.corridaIdCriada}/status.json`;
@@ -699,20 +699,108 @@ fetch(firebaseURLCorrida)
 })
 .catch(err => console.error("Erro ao buscar corrida existente:", err));
 }
-
 function finalizarCorrida() {
-if (!confirm('Confirma que a corrida foi finalizada?')) return;
+    if (!confirm('Confirma que a corrida foi finalizada?')) return;
 
-const cpfPassageiro = window.cpfLogado;
-const firebaseURLCorrida = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${cpfPassageiro}.json`;
-releaseWakeLock()
+    const cpfPassageiro = window.cpfLogado;
+    const urlCorrida = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/corridas/${cpfPassageiro}.json`;
+    const urlHistorico = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/historico/${cpfPassageiro}.json`;
 
-fetch(firebaseURLCorrida, { method: 'DELETE' })
-.then(() => {
-  alert('Corrida finalizada!');
-  window.location.reload(); // Atualiza a tela limpando tudo
-})
-.catch(err => console.error('Erro ao finalizar corrida:', err));
+    releaseWakeLock();
+
+    console.log("🔍 Iniciando finalização de corrida...");
+
+    fetch(urlCorrida)
+        .then(res => res.json())
+        .then(corrida => {
+            console.log("✅ Corrida ativa encontrada:", corrida);
+            if (!corrida) {
+                alert('Nenhuma corrida ativa encontrada.');
+                return;
+            }
+
+            const agora = new Date();
+            const agoraISO = agora.toISOString();
+            const chaveHistorico = agoraISO.replace(/[:.]/g, '_');
+            corrida.dataFinalizacao = agoraISO;
+
+            // URL do histórico do motorista
+            const urlHistoricoMotorista = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/historico_motorista/${corrida.motorista}.json`;
+
+            // Atualiza histórico do passageiro
+            fetch(urlHistorico)
+                .then(res => res.json())
+                .then(historico => {
+                    console.log("📦 Histórico atual (passageiro):", historico);
+                    const novoHistorico = {};
+                    const historicoArray = historico ? Object.entries(historico) : [];
+
+                    historicoArray.sort((a, b) => a[0].localeCompare(b[0]));
+                    const ultimos4 = historicoArray.slice(-4);
+
+                    for (const [chave, corridaAnterior] of ultimos4) {
+                        novoHistorico[chave] = corridaAnterior;
+                    }
+
+                    novoHistorico[chaveHistorico] = corrida;
+
+                    return fetch(urlHistorico, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(novoHistorico)
+                    });
+                })
+                .catch(err => console.error('❌ Erro ao salvar histórico do passageiro:', err));
+
+            // Atualiza histórico do motorista
+            fetch(urlHistoricoMotorista)
+                .then(res => res.json())
+                .then(historicoMotorista => {
+                    console.log("📦 Histórico atual (motorista):", historicoMotorista);
+                    const novoHistoricoMotorista = {};
+                    const historicoArrayMotorista = historicoMotorista ? Object.entries(historicoMotorista) : [];
+
+                    historicoArrayMotorista.sort((a, b) => a[0].localeCompare(b[0]));
+                    const ultimos4Motorista = historicoArrayMotorista.slice(-4);
+
+                    for (const [chave, corridaAnterior] of ultimos4Motorista) {
+                        novoHistoricoMotorista[chave] = corridaAnterior;
+                    }
+
+                    // Monta objeto simplificado para motorista
+                    novoHistoricoMotorista[chaveHistorico] = {
+                        dataFinalizacao: agoraISO,
+                        partida: corrida.partida,
+                        destino: corrida.destino,
+                        preco: corrida.preco,
+                        passageiro: cpfPassageiro
+                    };
+
+                    return fetch(urlHistoricoMotorista, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(novoHistoricoMotorista)
+                    });
+                })
+                .catch(err => console.error('❌ Erro ao salvar histórico do motorista:', err));
+
+            // Apagar corrida ativa
+            return fetch(urlHistorico) // usar um then extra aqui para encadear o DELETE após os históricos
+                .then(() => fetch(urlCorrida, { method: 'DELETE' }))
+                .then(() => {
+                    // Mostrar o card com resumo da corrida
+                    document.getElementById('resumoPartidaCard').textContent = corrida.partida;
+                    document.getElementById('resumoDestinoCard').textContent = corrida.destino;
+                    document.getElementById('resumoDistanciaCard').textContent = corrida.distancia_km.toFixed(2);
+                    document.getElementById('resumoMotoristaCard').textContent = corrida.motorista || 'Não informado';
+                    document.getElementById('resumoPrecoCard').textContent = corrida.preco.toFixed(2);
+                    document.getElementById('cardResumoCorrida').classList.remove('hidden');
+                });
+        })
+        .catch(err => {
+            console.error('❌ Erro ao finalizar corrida:', err);
+            alert('Erro ao finalizar corrida.');
+        });
 }
 
 function fecharcarddestino() {
@@ -857,3 +945,56 @@ function fecharPopup() {
     const popup = document.getElementById('popupMensagem');
     popup.classList.add('hidden');
 }
+
+function fecharCardResumoCorrida() {
+  document.getElementById('cardResumoCorrida').classList.add('hidden');
+  window.location.reload();
+}
+
+function mostrarHistoricoCorridas() {
+  const cpf = window.cpfLogado;
+  const urlHistorico = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/historico/${cpf}.json`;
+
+  fetch(urlHistorico)
+    .then(res => res.json())
+    .then(data => {
+      const lista = document.getElementById('listaHistorico');
+      lista.innerHTML = ''; // Limpa antes de exibir
+
+      if (!data) {
+        lista.innerHTML = '<p>Nenhuma corrida encontrada.</p>';
+      } else {
+        // Ordenar por chave (data)
+        const corridas = Object.entries(data)
+          .sort((a, b) => b[0].localeCompare(a[0])) // Mais recentes primeiro
+          .slice(0, 5); // Máximo 5
+
+        for (const [_, corrida] of corridas) {
+          const item = document.createElement('div');
+          item.classList.add('corrida-item');
+
+          const dataObj = new Date(corrida.data || corrida.dataFinalizacao || '');
+          const dataFormatada = dataObj.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+          item.innerHTML = `
+            <p><strong>Data:</strong> ${dataFormatada}</p>
+            <p><strong>De:</strong> ${corrida.partida}</p>
+            <p><strong>Para:</strong> ${corrida.destino}</p>
+            <p><strong>Valor:</strong> R$ ${corrida.preco?.toFixed(2) ?? '0.00'}</p>
+          `;
+          lista.appendChild(item);
+        }
+      }
+
+      document.getElementById('cardHistorico').classList.remove('hidden');
+    })
+    .catch(err => {
+      console.error('Erro ao buscar histórico:', err);
+      alert('Erro ao carregar histórico.');
+    });
+}
+
+function fecharCardHistorico() {
+  document.getElementById('cardHistorico').classList.add('hidden');
+}
+
