@@ -92,9 +92,15 @@
       <button onclick="calcularRota()"><i class="fas fa-location-arrow"></i> OK</button>
 
       <div id="loadingMotorista" class="hidden">
-        <p>Procurando motorista <i class="fas fa-spinner fa-spin"></i></p>
+        <p id="statusBusca">Procurando motorista <i class="fas fa-spinner fa-spin"></i></p>
+        
+        <div id="dadosMotorista" class="hidden">
+          <p><strong>Motorista:</strong> <span id="nomeMotorista">-</span></p>
+          <p><strong>Carro:</strong> <span id="carroMotorista">-</span></p>
+          <p><strong>Placa:</strong> <span id="placaMotorista">-</span></p>
+        </div>
       </div>
-    </div>
+
 
     <div id="infoMotorista" class="hidden card">
       <p><i class="fas fa-user-tie"></i> <span id="nomeMotorista">---</span></p>
