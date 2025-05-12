@@ -527,21 +527,26 @@ document.querySelector('button[onclick="calcularRota()"]').style.display = 'none
 }
 
 function exibirMotorista(cpfMotorista) {
-fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/motoristas/${cpfMotorista}.json`)
-.then(res => res.json())
-.then(motorista => {
-  if (!motorista) {
-    console.warn('Motorista não encontrado.');
-    return;
-  }
+  fetch(`https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/motoristas/${cpfMotorista}.json`)
+    .then(res => res.json())
+    .then(motorista => {
+      if (!motorista) {
+        console.warn('Motorista não encontrado.');
+        return;
+      }
 
-  // Preenche o card com as informações
-  document.getElementById('nomeMotorista').textContent = motorista.nome || 'Desconhecido';
-  document.getElementById('carroMotorista').textContent = motorista.modelo || '-';
-  document.getElementById('placaMotorista').textContent = motorista.placa || '-';
-})
-.catch(err => console.error("Erro ao buscar dados do motorista:", err));
+      document.getElementById('nomeMotorista').textContent = motorista.nome || 'Desconhecido';
+      document.getElementById('carroMotorista').textContent = motorista.modelo || '-';
+      document.getElementById('placaMotorista').textContent = motorista.placa || '-';
+
+      document.getElementById('statusBusca').textContent = 'Motorista encontrado!';
+      document.getElementById('dadosMotorista').classList.remove('hidden');
+      document.getElementById('loadingMotorista').classList.remove('hidden');
+    })
+    .catch(err => console.error("Erro ao buscar dados do motorista:", err));
 }
+
+
 
 function verificarAceiteMotorista(cpfPassageiro) {
   window.temporizadorInterval = setInterval(() => {
@@ -553,7 +558,6 @@ function verificarAceiteMotorista(cpfPassageiro) {
         if (data.status === 'aceita' && data.motorista) {
           if (!window.motoristaExibido || window.motoristaAtual !== data.motorista) {
             mostrarPopup('Sua corrida foi aceita pelo motorista!', 3000);
-            document.getElementById('loadingMotorista').classList.add('hidden');
             exibirMotorista(data.motorista);
             window.motoristaExibido = true;
             window.motoristaAtual = data.motorista;
@@ -675,10 +679,13 @@ mostrarPopup('Erro ao cancelar a corrida. Tente novamente.', 3000)
 }
 
 function limparMotorista() {
-document.getElementById('nomeMotorista').textContent = '---';
-document.getElementById('carroMotorista').textContent = '---';
-document.getElementById('placaMotorista').textContent = '---';
-
+  document.getElementById('loadingMotorista').classList.add('hidden');
+  document.getElementById('dadosMotorista').classList.add('hidden');
+  document.getElementById('statusBusca').innerHTML = 'Procurando motorista <i class="fas fa-spinner fa-spin"></i>';
+  
+  document.getElementById('nomeMotorista').textContent = '-';
+  document.getElementById('carroMotorista').textContent = '-';
+  document.getElementById('placaMotorista').textContent = '-';
 }
 
 function buscarCorridaExistente() {
@@ -725,6 +732,13 @@ function finalizarCorrida() {
             const chaveHistorico = agoraISO.replace(/[:.]/g, '_');
             corrida.dataFinalizacao = agoraISO;
 
+            // Salva dados para o resumo antes de deletar
+            const resumoPartida = corrida.partida || '';
+            const resumoDestino = corrida.destino || '';
+            const resumoDistancia = corrida.distancia_km || 0;
+            const resumoMotorista = corrida.motorista || 'Não informado';
+            const resumoPreco = corrida.preco || 0;
+
             // URL do histórico do motorista
             const urlHistoricoMotorista = `https://cardosoborracharia-a8854-default-rtdb.firebaseio.com/historico_motorista/${corrida.motorista}.json`;
 
@@ -768,7 +782,6 @@ function finalizarCorrida() {
                         novoHistoricoMotorista[chave] = corridaAnterior;
                     }
 
-                    // Monta objeto simplificado para motorista
                     novoHistoricoMotorista[chaveHistorico] = {
                         dataFinalizacao: agoraISO,
                         partida: corrida.partida,
@@ -776,7 +789,6 @@ function finalizarCorrida() {
                         preco: corrida.preco,
                         status: 'finalizada',
                         passageiro: corrida.nomePassageiro || 'Desconhecido',
-                        
                     };
 
                     return fetch(urlHistoricoMotorista, {
@@ -787,16 +799,14 @@ function finalizarCorrida() {
                 })
                 .catch(err => console.error('❌ Erro ao salvar histórico do motorista:', err));
 
-            // Apagar corrida ativa
-            return fetch(urlHistorico) // usar um then extra aqui para encadear o DELETE após os históricos
-                .then(() => fetch(urlCorrida, { method: 'DELETE' }))
+            // Apagar corrida ativa e exibir resumo
+            return fetch(urlCorrida, { method: 'DELETE' })
                 .then(() => {
-                    // Mostrar o card com resumo da corrida
-                    document.getElementById('resumoPartidaCard').textContent = corrida.partida;
-                    document.getElementById('resumoDestinoCard').textContent = corrida.destino;
-                    document.getElementById('resumoDistanciaCard').textContent = corrida.distancia_km.toFixed(2);
-                    document.getElementById('resumoMotoristaCard').textContent = corrida.motorista || 'Não informado';
-                    document.getElementById('resumoPrecoCard').textContent = corrida.preco.toFixed(2);
+                    document.getElementById('resumoPartidaCard').textContent = resumoPartida;
+                    document.getElementById('resumoDestinoCard').textContent = resumoDestino;
+                    document.getElementById('resumoDistanciaCard').textContent = resumoDistancia.toFixed(2);
+                    document.getElementById('resumoMotoristaCard').textContent = resumoMotorista;
+                    document.getElementById('resumoPrecoCard').textContent = resumoPreco.toFixed(2);
                     document.getElementById('cardResumoCorrida').classList.remove('hidden');
                 });
         })
