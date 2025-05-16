@@ -1,0 +1,719 @@
+/* Reset e configurações globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth; /* Habilita rolagem suave */
+    font-size: 18px;      /* Tamanho base da fonte */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5); /* Fundo com gradiente */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center; /* Centraliza o conteúdo horizontalmente */
+    align-items: flex-start; /* Alinha o conteúdo ao topo */
+    padding: 20px 10px;
+    overflow-x: hidden;   /* Evita barra de rolagem horizontal */
+}
+
+.hidden {
+    display: none !important; /* Esconde elementos (importante para sobrepor outros estilos) */
+}
+
+/* ---------------------------- Estilos mais genéricos  ------------------*/
+
+.container, .painel-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 100%;
+    padding: 1.5rem;
+    animation: fadeIn 0.5s ease; /* Animação de entrada */
+    text-align: center;
+}
+
+.painel-container {
+    margin-top: 0px;
+    padding: 1rem;
+}
+
+/* ---------------------------- Títulos e textos ---------------------------- */
+
+h2, h3, h4 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.0rem;
+    color: #555;
+    margin: 0.5rem 0;
+}
+
+/* ---------------------------- Inputs e botões ---------------------------- */
+
+input, button, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: scale(1.02);
+}
+
+/* ---------------------------- Links ---------------------------- */
+
+a {
+    color: #74ebd5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---------------------------- Modal ---------------------------- */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 350px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content button.cancelar {
+    background-color: #e53935;
+}
+
+/* ---------------------------- Ícones no topo ---------------------------- */
+
+.topoIcons {
+    display: flex;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+}
+
+.iconItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #333;
+}
+
+.iconItem i {
+    font-size: 18px;
+}
+
+.iconItem span {
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+/* ---------------------------- Cartão do painel ---------------------------- */
+
+.cardPainel {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 10px;
+    text-align: left;
+}
+
+.cardPainel h2 {
+    font-size: 1.1rem;
+}
+
+.cardPainel p, .cardPainel i {
+    font-size: 0.9rem;
+}
+
+/* ---------------------------- Cartão de corrida aceita ---------------------------- */
+
+.card-corrida {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: pulsar 2s infinite; /* Animação de pulsação */
+}
+
+.card-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-bloco {
+    margin: 12px 0;
+}
+
+.info-linha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.endereco-texto {
+    font-size: 15px;
+    color: #333;
+    word-break: break-word; /* Quebra palavras longas */
+}
+
+.info-valores {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 1.0rem;
+}
+
+.mapa-corrida, #mapaResumo {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    margin-top: 12px;
+    background: #eee;
+}
+
+/* ---------------------------- Ícones extras ---------------------------- */
+
+.icon-copy, .icon-blue, .icon-red, .icon-gold, .icon-gray {
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* ---------------------------- Animações ---------------------------- */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulsar {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+#loadingIcon, #loadingMotorista i.fa-spinner {
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 10px;
+    animation: spin 1s linear infinite; /* Animação de rotação */
+    color: #333;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---------------------------- Responsivo ---------------------------- */
+
+@media (max-width: 600px) {
+    .container, .painel-container {
+        padding: 1rem;
+    }
+
+    h2 {
+        font-size: 1.7rem;
+    }
+    h3 {
+        font-size: 1.3rem;
+    }
+    h4 {
+        font-size: 1.1rem;
+    }
+
+    input, button {
+        font-size: 14px;
+    }
+
+    .card-corrida {
+        font-size: 13px;
+        padding: 12px;
+    }
+}
+
+/* ---------------------------- Estilos específicos da página ---------------------------- */
+
+.usuario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.usuario-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.icone-acao {
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.icone-acao:hover {
+    color: #007bff;
+}
+
+.linha-botoes {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.linha-botoes button {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.linha-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.linha-info p {
+    flex: 1;
+    margin: 0;
+}
+
+/* ---------------------------- Estilos para inputs com ícones ---------------------------- */
+
+input#cpf,
+input#senha,
+input#nomeCadastro,
+input#cpfCadastro,
+input#senhaCadastro,
+input#telefoneCadastro,
+input#bairroCadastro,
+input#partida,
+input#destino {
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 18px;
+    padding-left: 36px;
+}
+
+/* Ícone para CPF */
+input#cpf,
+input#cpfCadastro {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/id-card.svg");
+}
+
+/* Ícone para Senha */
+input#senha,
+input#senhaCadastro {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/lock.svg");
+}
+
+/* Ícone para Nome de Cadastro */
+input#nomeCadastro {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/user.svg");
+}
+
+/* Ícone para Telefone de Cadastro */
+input#telefoneCadastro {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/phone.svg");
+}
+
+/* Ícone para Bairro de Cadastro */
+input#bairroCadastro {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/map.svg");
+}
+
+/* Ícone para Partida */
+input#partida {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/map-marker-alt.svg");
+}
+
+/* Ícone para Destino */
+input#destino {
+    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/flag-checkered.svg"); /* Adicionei um ícone para destino */
+}
+
+/* ---------------------------- Card Flutuante de Mensagem (popupMensagem) ---------------------------- */
+#popupMensagem {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    color: #333;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1001; /* Garante que fique acima do modal, se houver */
+    text-align: center;
+    min-width: 200px;
+}
+
+#popupMensagem button {
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+#popupMensagem button:hover {
+    background-color: #0056b3;
+}
+
+#popupTexto {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+/* ---------------------------- Card Flutuante de Histórico (cardHistorico) ---------------------------- */
+#cardHistorico {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  width: 92%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow: hidden; /* Impede overflow lateral */
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', sans-serif;
+  border: 1px solid #ddd;
+}
+
+/* Cabeçalho fixo elegante */
+.header-historico {
+  position: sticky;
+  top: 0;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #ccc;
+  z-index: 10;
+}
+
+.header-historico h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.fechar-btn {
+  background: #e0e0e0;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.2s;
+}
+.fechar-btn:hover {
+  background: #d0d0d0;
+}
+
+.lista-corridas {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.corrida-item {
+  background: #fafafa;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.corrida-item p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+/* Esconde o card inicialmente */
+#cardHistorico.hidden {
+  display: none;
+}
+
+/* ---------------------------- Card de Resumo da Corrida Finalizada (cardResumoCorrida) ---------------------------- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+#cardResumoCorrida {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  padding: 24px;
+  text-align: left;
+  width: 90%;
+  max-width: 400px;
+  z-index: 1000;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+#cardResumoCorrida h2 {
+  font-size: 1.6em;
+  margin-bottom: 18px;
+  color: #222;
+}
+
+#cardResumoCorrida p {
+  font-size: 1em;
+  color: #444;
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+#cardResumoCorrida .valor-a-pagar {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #198754; /* verde moderno */
+  margin-top: 24px;
+}
+
+#cardResumoCorrida .valor-a-pagar span {
+  font-size: 1.6em;
+  display: block;
+  margin-top: 6px;
+}
+
+#cardResumoCorrida button {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 26px;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+#cardResumoCorrida button:hover {
+  background: linear-gradient(90deg, #0056b3, #003f8a);
+}
+
+#cardResumoCorrida.hidden {
+  display: none;
+}
+
+/* informações do motorista que aparecem depois da corrida aceita */
+
+.card-motorista {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  margin-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.3;
+  
+  /* Centralização de conteúdo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.card-motorista i {
+  margin-right: 4px;
+  color: #444;
+  font-size: 13px;
+}
+
+.info-linha {
+  display: flex;
+  justify-content: center; /* centraliza os dois blocos */
+  gap: 12px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.info-linha p {
+  margin: 2px 0;
+  font-size: 13px;
+}
+
+#statusBusca {
+  font-size: 13px;
+  margin-bottom: 4px; /* espaço menor abaixo da mensagem de busca */
+}
+
+
+/* card metodo de pagamento */
+
+
+.card-flutuante {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  z-index: 1000;
+  width: 300px;
+  text-align: center;
+}
+
+.card-flutuante .titulo-card {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.botoes-metodo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.botao-metodo {
+  flex: 1 1 40%;
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.botao-metodo i {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.botao-metodo:hover {
+  background: #ddd;
+}
+
+.fechar-card {
+  margin-top: 15px;
+  font-size: 20px;
+  cursor: pointer;
+  color: red;
+}
+.hidden {
+  display: none;
+}
